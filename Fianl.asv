@@ -1,0 +1,91 @@
+for i = 1 : 54
+%    qImg = quantizeRGB(['D:\MART\Images' int2str(i) '.jpg'], 6);
+    qImg = imread(['E:\SV\fruits\' int2str(i) '.jpg']);
+    qImg1=rgb2gray(qImg);
+    P(:,i) = imhist(qImg1);
+end
+P = double(P);
+T = [1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+     0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+     0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1];
+net = newff(minmax(P),[10 5],{'tansig','purelin'});
+net.trainParam.epochs = 500;
+net.trainParam.goal = 0.001;
+net = train(net,P,T);
+
+    qImg = imread('E:\SV\fruits\1.jpg');
+    qImg1=rgb2gray(qImg);
+    A = imhist(qImg1);
+    
+    
+% Y = Sim(net,A);
+% fid = fopen('re1.txt','w+');
+% for i =1 : 1
+%     k=max(Y(:,i));
+%     for j = 1 : 7
+%         if (k==Y(j,i))
+%             fprintf(1,'%s\n',['class' int2str(j)]);
+%         end 
+%     end
+% end
+
+
+
+testX = P(:,A);
+testT1 = T(:,A);
+testT=vec2ind(testT1);
+testY = net(testX);
+testIndices = vec2ind(testY);
+plotconfusion(testT1,testY)
+[c11,cm11] = confusion(testT1,testY);
+
+fprintf('Percentage Correct Classification   : %f%%\n', 100*(1-c11));
+fprintf('Percentage Incorrect Classification : %f%%\n', 100*c11);
+
+
+
+% for k1 = 1:length(pic)
+%    fname = [directory '/' f(pic(k1)).name];
+%   0000
+
+% img1= imread(fname);
+%    str=getname(k1,testT);
+%    str1=getname(k1,testIndices);
+%   str2=sprintf('%s :%s',str,str1);
+%   
+%    subplot(5,6,c);
+%    imshow(img1);
+%    title(str2);
+%    c=c+1;
+% 
+%    end
+% 
+%    function [str]=getname(k,test)
+% %testT=vec2ind(testT1);
+% testT=test(k);
+% 
+%     
+% if(testT==1)
+%     str='Angry';
+%     else if(testT==2)
+%                 str='Disgust';
+%         else if(testT==3)
+%                 str='Fear';
+%             else if(testT==4)
+%                     str='Happy';
+%                 else if(testT==5)
+%                     str='Sad';
+%                     else if(testT==6)
+%                          str='Surprise';
+%                         end
+%                     end
+%                 end
+%             end
+%         end
+% end 
+% end
+% 
